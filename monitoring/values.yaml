@@ -1,6 +1,12 @@
 cluster:
   name: k8s-cluster-a228
 
+# 關閉外部 Grafana Cloud / Prometheus 對接（使用本機自建儲存）
+externalServices:
+  prometheus:
+    host: ""
+    path: ""
+
 # 1. 啟用 Metrics 指標收集 (透過輕量化 Grafana Alloy)
 metrics:
   enabled: true
