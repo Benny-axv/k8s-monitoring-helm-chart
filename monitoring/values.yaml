@@ -1,13 +1,7 @@
 cluster:
   name: k8s-cluster-a228
 
-# 關閉外部 Grafana Cloud / Prometheus 對接（使用本機自建儲存）
-externalServices:
-  prometheus:
-    host: ""
-    path: ""
-
-# 1. 啟用 Metrics 指標收集 (透過輕量化 Grafana Alloy)
+# 1. 指標數據收集 (透過 Alloy)
 metrics:
   enabled: true
   alloy:
@@ -20,19 +14,21 @@ metrics:
   kube-state-metrics:
     enabled: true
 
-# 2. 自動收集 K8s Annotations 服務發現 (不需要任何 CRD!)
+# 2. 開啟 K8s 原生 Annotations 自動服務發現 (不用 CRD!)
 annotations:
   enabled: true
 
-# 3. 部署自建 Prometheus (指標儲存庫)
+# 3. 部署自建 Prometheus 並將 Alloy 資料注入內部 Prometheus
 prometheus:
   deploy: true
-  prometheusSpec:
-    retention: 7d
-    storageSpec:
-      emptyDir: {}
 
-# 4. 部署自建 Grafana (視覺化介面)
+# 4. 關閉對外部 Grafana Cloud 的遠端寫入驗證 (讓它指向內部 Prometheus)
+externalServices:
+  prometheus:
+    host: "http://grafana-k8s-monitoring-prometheus.monitoring.svc.cluster.local:9090"
+    writeEndpoint: "/api/v1/write"
+
+# 5. 部署自建 Grafana (視覺化畫面)
 grafana:
   deploy: true
   adminPassword: "AdminPassword123!"
