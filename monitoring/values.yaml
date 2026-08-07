@@ -1,6 +1,5 @@
-global:
-  cluster:
-    name: k8s-cluster-a228
+cluster:
+  name: k8s-cluster-a228
 
 # 1. 啟用 Metrics 指標收集 (透過輕量化 Grafana Alloy)
 metrics:
