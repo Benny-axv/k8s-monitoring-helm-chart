@@ -1,0 +1,34 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: grafana-k8s-monitoring
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  sources:
+    # 來源 A：Grafana 官方 Helm Repo
+    - repoURL: 'https://grafana.github.io/helm-charts'
+      chart: k8s-monitoring
+      targetRevision: 1.x.x
+      helm:
+        valueFiles:
+          - '$values/monitoring/values.yaml'
+
+    # 來源 B：您的全新 GitHub 儲存庫 (正確的 Repo 名稱)
+    - repoURL: 'git@github.com:Benny-axv/k8s-monitoring-helm-chart.git'
+      targetRevision: main
+      ref: values
+
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: monitoring
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true

@@ -1,0 +1,35 @@
+global:
+  cluster:
+    name: k8s-cluster-a228
+
+# 1. 啟用 Metrics 指標收集 (透過輕量化 Grafana Alloy)
+metrics:
+  enabled: true
+  alloy:
+    metrics:
+      enabled: true
+  cost:
+    enabled: false
+  node-exporter:
+    enabled: true
+  kube-state-metrics:
+    enabled: true
+
+# 2. 自動收集 K8s Annotations 服務發現 (不需要任何 CRD!)
+annotations:
+  enabled: true
+
+# 3. 部署自建 Prometheus (指標儲存庫)
+prometheus:
+  deploy: true
+  prometheusSpec:
+    retention: 7d
+    storageSpec:
+      emptyDir: {}
+
+# 4. 部署自建 Grafana (視覺化介面)
+grafana:
+  deploy: true
+  adminPassword: "AdminPassword123!"
+  service:
+    type: NodePort
