@@ -17,7 +17,7 @@ spec:
           - '$values/monitoring/values.yaml'
 
     # 來源 B：您的全新 GitHub 儲存庫 (正確的 Repo 名稱)
-    - repoURL: 'git@github.com:Benny-axv/k8s-monitoring-helm-chart.git'
+    - repoURL: 'https://github.com:Benny-axv/k8s-monitoring-helm-chart.git'
       targetRevision: main
       ref: values
 
