@@ -11,7 +11,7 @@ spec:
     # 來源 A：改用 Grafana 的 lgtm-distributed Chart
     - repoURL: 'https://grafana.github.io/helm-charts'
       chart: lgtm-distributed
-      targetRevision: 0.x.x              # 請依你需要指定版號或使用最新版
+      targetRevision: "*"              # 請依你需要指定版號或使用最新版
       helm:
         valueFiles:
           - '$values/monitoring/lgtm-values.yaml'
