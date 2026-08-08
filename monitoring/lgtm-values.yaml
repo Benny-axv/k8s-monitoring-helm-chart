@@ -1,5 +1,5 @@
 # ----------------------------------------------------
-# 1. 開啟四神獸：Loki, Grafana, Tempo, Mimir
+# 1. UI 與展示介面
 # ----------------------------------------------------
 grafana:
   enabled: true
@@ -7,49 +7,70 @@ grafana:
   service:
     type: NodePort
 
+# ----------------------------------------------------
+# 2. Tempo (Traces) - 啟用 local-path 動態持久化
+# ----------------------------------------------------
+tempo:
+  enabled: true
+  ingester:
+    persistence:
+      enabled: true
+      storageClass: local-path  # 自動由 local-path 生成 PV 存放 Traces WAL
+      size: 10Gi
+
+# ----------------------------------------------------
+# 3. Loki (Logs) - 啟用 local-path 動態持久化
+# ----------------------------------------------------
 loki:
   enabled: true
+  ingester:
+    persistence:
+      enabled: true
+      storageClass: local-path  # 自動由 local-path 生成 PV 存放 Log
+      size: 10Gi
   structuredConfig:
     common:
       path_prefix: /var/loki
       storage:
-        type: filesystem # 測試環境免雲端 S3/GCS 物件儲存
-
-tempo:
-  enabled: true
+        type: filesystem       # 使用本地檔案系統
 
 # ----------------------------------------------------
-# 2. Mimir & MinIO 關鍵修復：關閉 PVC 持久化
+# 4. MinIO (物件儲存) - 啟用 local-path 動態持久化
 # ----------------------------------------------------
-mimir:
-  enabled: true
-  structuredConfig:
-    common:
-      storage:
-        backend: filesystem # 使用內建/本地檔案系統
-  
-  # 關閉所有 Mimir 元件的 PVC 請求
-  ingester:
-    persistentVolume:
-      enabled: false
-  store_gateway:
-    persistentVolume:
-      enabled: false
-  compactor:
-    persistentVolume:
-      enabled: false
-  alertmanager:
-    persistentVolume:
-      enabled: false
-
-# 關閉分散式儲存核心 MinIO 的 PVC 請求
 minio:
   enabled: true
   persistence:
-    enabled: false # 使用 emptyDir 替代實體 PVC
+    enabled: true
+    storageClass: local-path    # 自動由 local-path 生成 PV
+    size: 20Gi
 
 # ----------------------------------------------------
-# 3. 停用與 k8s-monitoring (Alloy) 重複的採集 Exporters
+# 5. Mimir (Metrics) - 啟用 local-path 動態持久化
+# ----------------------------------------------------
+mimir:
+  enabled: true
+  
+  ingester:
+    persistentVolume:
+      enabled: true
+      storageClass: local-path  # 自動由 local-path 生成 PV 存放 Metrics
+      size: 10Gi
+  store_gateway:
+    persistentVolume:
+      enabled: true
+      storageClass: local-path
+      size: 10Gi
+  compactor:
+    persistentVolume:
+      enabled: true
+      storageClass: local-path
+      size: 10Gi
+  alertmanager:
+    persistentVolume:
+      enabled: false            # 測試環境用量極低，維持關閉即可
+
+# ----------------------------------------------------
+# 6. 停用與 k8s-monitoring (Alloy) 重複的採集 Exporters
 # ----------------------------------------------------
 prometheus-node-exporter:
   enabled: false
