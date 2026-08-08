@@ -14,6 +14,9 @@ metrics:
   kube-state-metrics:
     enabled: true
 
+opencost:
+  enabled: false
+
 # 2. 徹底停用 Logs 與 Events 模組
 logs:
   enabled: false
