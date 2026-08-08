@@ -20,6 +20,12 @@ minio:
     requests:
       memory: 256Mi
       cpu: 100m
+  # 💡 同時寫入多種語法格式，確保相容不同版本的 MinIO Helm Subchart
+  defaultBuckets: "mimir,loki,tempo"
+  buckets:
+    - name: mimir
+    - name: loki
+    - name: tempo
 
 # ----------------------------------------------------
 # 3. Tempo (Traces - 鏈路追蹤)
