@@ -29,20 +29,10 @@ events:
   enabled: false
 
 # ----------------------------------------------------
-# 3. 鏈路追蹤 (Traces -> 指向 LGTM 的 Tempo)
+# 3. 鏈路追蹤 (Traces)
 # ----------------------------------------------------
 traces:
   enabled: true
-  receiver:
-    otlp:
-      grpc:
-        enabled: true
-      http:
-        enabled: true
-  destinations:
-    - name: tempo
-      type: otlp
-      url: "http://lgtm-stack-tempo-distributor.monitoring.svc.cluster.local:4317" # Tempo OTLP gRPC 入口
 
 # ----------------------------------------------------
 # 4. 自動收集 K8s Annotations 服務發現
@@ -51,14 +41,19 @@ annotations:
   enabled: true
 
 # ----------------------------------------------------
-# 5. 外部後端服務 (Metrics -> Mimir / Logs -> Loki)
+# 5. 外部後端服務 (Metrics -> Mimir / Logs -> Loki / Traces -> Tempo)
 # ----------------------------------------------------
 externalServices:
   prometheus:
     # 指向 Mimir Nginx Gateway
     host: "http://lgtm-stack-mimir-nginx.monitoring.svc.cluster.local:80"
     writeEndpoint: "/api/v1/push"
+
   loki:
     # 指向 Loki Gateway
     host: "http://lgtm-stack-loki-gateway.monitoring.svc.cluster.local:80"
     writeEndpoint: "/loki/api/v1/push"
+
+  tempo:
+    # 指向 Tempo Distributor (OTLP HTTP Endpoint)
+    host: "http://lgtm-stack-tempo-distributor.monitoring.svc.cluster.local:4318"
