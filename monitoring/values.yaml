@@ -1,7 +1,9 @@
 cluster:
   name: k8s-cluster-a228
 
-# 1. 數據指標收集 (透過 Grafana Alloy)
+# ----------------------------------------------------
+# 1. 數據指標收集 (Metrics)
+# ----------------------------------------------------
 metrics:
   enabled: true
   alloy:
@@ -17,32 +19,46 @@ metrics:
 opencost:
   enabled: false
 
-# 2. 徹底停用 Logs 與 Events 模組
+# ----------------------------------------------------
+# 2. 日誌收集 (Logs)
+# ----------------------------------------------------
 logs:
-  enabled: false
+  enabled: true
+
 events:
   enabled: false
 
-# 3. 自動收集 K8s Annotations 服務發現 (完全不需 CRD!)
+# ----------------------------------------------------
+# 3. 鏈路追蹤 (Traces -> 指向 LGTM 的 Tempo)
+# ----------------------------------------------------
+traces:
+  enabled: true
+  receiver:
+    otlp:
+      grpc:
+        enabled: true
+      http:
+        enabled: true
+  destinations:
+    - name: tempo
+      type: otlp
+      url: "http://lgtm-stack-tempo-distributor.monitoring.svc.cluster.local:4317" # Tempo OTLP gRPC 入口
+
+# ----------------------------------------------------
+# 4. 自動收集 K8s Annotations 服務發現
+# ----------------------------------------------------
 annotations:
   enabled: true
 
-# 4. 部署自建 Prometheus 與 Grafana
-prometheus:
-  enabled: true
-
-grafana:
-  enabled: true
-  adminPassword: "AdminPassword123!"
-  service:
-    type: NodePort
-
-# 5. 【關鍵修復】補齊 Prometheus 與 Loki 的偽裝對接網址
-# 這樣不論 Helm Template 怎麼嚴格檢查，都會直接通過 Pass！
+# ----------------------------------------------------
+# 5. 外部後端服務 (Metrics -> Mimir / Logs -> Loki)
+# ----------------------------------------------------
 externalServices:
   prometheus:
-    host: "http://grafana-k8s-monitoring-prometheus.monitoring.svc.cluster.local:9090"
-    writeEndpoint: "/api/v1/write"
+    # 指向 Mimir Nginx Gateway
+    host: "http://lgtm-stack-mimir-nginx.monitoring.svc.cluster.local:80"
+    writeEndpoint: "/api/v1/push"
   loki:
-    host: "http://localhost:3100"
+    # 指向 Loki Gateway
+    host: "http://lgtm-stack-loki-gateway.monitoring.svc.cluster.local:80"
     writeEndpoint: "/loki/api/v1/push"
