@@ -45,6 +45,16 @@ tempo:
       requests:
         memory: 256Mi
         cpu: 100m
+  # 💡 關鍵：加入 structuredConfig 並指定全域/Ingester 複製係數為 1
+  structuredConfig:
+    global_overrides:
+      defaults:
+        ingester:
+          replication_factor: 1
+    ingester:
+      lifecycler:
+        ring:
+          replication_factor: 1
 
 # ----------------------------------------------------
 # 4. Loki (Logs - 日誌服務)
