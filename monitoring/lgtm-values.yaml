@@ -1,0 +1,19 @@
+# 給 loki-stack (後端全家桶) 用的 values
+grafana:
+  enabled: true
+  adminPassword: "AdminPassword123!"
+  service:
+    type: NodePort
+
+prometheus:
+  enabled: true
+  server:
+    retention: 7d
+
+loki:
+  enabled: true
+  persistence:
+    enabled: false
+
+tempo:
+  enabled: true

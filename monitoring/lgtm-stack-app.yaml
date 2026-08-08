@@ -1,0 +1,33 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: lgtm-stack
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  sources:
+    # 來源 A：Grafana 官方 Helm Chart
+    - repoURL: 'https://grafana.github.io/helm-charts'
+      chart: loki-stack
+      targetRevision: 2.x.x
+      helm:
+        valueFiles:
+          - '$values/monitoring/lgtm-values.yaml'
+
+    # 來源 B：你的 GitHub 儲存庫 (讀取裡面的 lgtm-values.yaml)
+    - repoURL: 'https://github.com/Benny-axv/k8s-monitoring-helm-chart.git'
+      targetRevision: main
+      ref: values
+
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: monitoring
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
