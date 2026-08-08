@@ -29,10 +29,10 @@ annotations:
 
 # 4. 部署自建 Prometheus 與 Grafana
 prometheus:
-  deploy: true
+  enabled: true
 
 grafana:
-  deploy: true
+  enabled: true
   adminPassword: "AdminPassword123!"
   service:
     type: NodePort
