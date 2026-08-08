@@ -14,8 +14,12 @@ minio:
   enabled: true
   persistence:
     enabled: true
-    storageClass: local-path    # 使用 local-path 動態配發 PV
+    storageClass: local-path
     size: 20Gi
+  resources:
+    requests:
+      memory: 256Mi
+      cpu: 100m
 
 # ----------------------------------------------------
 # 3. Tempo (Traces - 鏈路追蹤)
@@ -31,6 +35,10 @@ tempo:
       enabled: true
       storageClass: local-path
       size: 10Gi
+    resources:
+      requests:
+        memory: 256Mi
+        cpu: 100m
 
 # ----------------------------------------------------
 # 4. Loki (Logs - 日誌服務)
@@ -42,6 +50,10 @@ loki:
       enabled: true
       storageClass: local-path
       size: 10Gi
+    resources:
+      requests:
+        memory: 256Mi
+        cpu: 100m
   structuredConfig:
     common:
       path_prefix: /var/loki
@@ -59,26 +71,66 @@ mimir:
     blocks_storage:
       backend: s3
 
-  # 開啟多租戶與 Gateway
   nginx:
     enabled: true
 
-  # 各個微服務元件之動態 PV/PVC 設定
+  # 停用用不到的 Alertmanager（大幅節省記憶體）
+  alertmanager:
+    enabled: false
+
+  # --------------------------------------------------
+  # 給予關鍵 Mimir 組件足夠的記憶體與 Readiness 探針寬限期
+  # --------------------------------------------------
+  querier:
+    resources:
+      requests:
+        memory: 512Mi
+        cpu: 100m
+      limits:
+        memory: 1Gi
+    readinessProbe:
+      initialDelaySeconds: 60
+      timeoutSeconds: 5
+
+  query_frontend:
+    resources:
+      requests:
+        memory: 256Mi
+        cpu: 100m
+
+  distributor:
+    resources:
+      requests:
+        memory: 256Mi
+        cpu: 100m
+
+  # 微服務組件 PV/PVC 與記憶體設定
   ingester:
     persistentVolume:
       enabled: true
       storageClass: local-path
       size: 10Gi
+    resources:
+      requests:
+        memory: 512Mi
+        cpu: 100m
+
   store_gateway:
     persistentVolume:
       enabled: true
       storageClass: local-path
       size: 10Gi
+    resources:
+      requests:
+        memory: 256Mi
+        cpu: 100m
+
   compactor:
     persistentVolume:
       enabled: true
       storageClass: local-path
       size: 10Gi
-  alertmanager:
-    persistentVolume:
-      enabled: false            # 測試環境用量低，維持關閉
+    resources:
+      requests:
+        memory: 256Mi
+        cpu: 100m
