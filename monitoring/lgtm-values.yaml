@@ -16,13 +16,40 @@ loki:
         type: filesystem # 測試環境免雲端 S3/GCS 物件儲存
 
 tempo:
-  enabled: true          # 這下真的有 Tempo 了！
-
-mimir:
-  enabled: true          # 代替舊版單機 Prometheus 的現代指標資料庫
+  enabled: true
 
 # ----------------------------------------------------
-# 2. 停用與 k8s-monitoring (Alloy) 重複的採集 Exporters
+# 2. Mimir & MinIO 關鍵修復：關閉 PVC 持久化
+# ----------------------------------------------------
+mimir:
+  enabled: true
+  structuredConfig:
+    common:
+      storage:
+        backend: filesystem # 使用內建/本地檔案系統
+  
+  # 關閉所有 Mimir 元件的 PVC 請求
+  ingester:
+    persistentVolume:
+      enabled: false
+  store_gateway:
+    persistentVolume:
+      enabled: false
+  compactor:
+    persistentVolume:
+      enabled: false
+  alertmanager:
+    persistentVolume:
+      enabled: false
+
+# 關閉分散式儲存核心 MinIO 的 PVC 請求
+minio:
+  enabled: true
+  persistence:
+    enabled: false # 使用 emptyDir 替代實體 PVC
+
+# ----------------------------------------------------
+# 3. 停用與 k8s-monitoring (Alloy) 重複的採集 Exporters
 # ----------------------------------------------------
 prometheus-node-exporter:
   enabled: false
