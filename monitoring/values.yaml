@@ -1,7 +1,7 @@
 cluster:
   name: k8s-cluster-a228
 
-# 1. 目的地對接 lgtm-system 空間下的微服務 API
+# 1. 數據傳送目的地對接 lgtm-system 空間下的微服務 API
 destinations:
   - name: mimir
     type: prometheus
@@ -19,12 +19,23 @@ destinations:
 # 2. 採集功能與微收集器 (Alloy 3.x)
 clusterMetrics:
   enabled: true
+
 podLogs:
   enabled: true
+
 clusterEvents:
   enabled: true
+
+# 💡 修正關鍵：補上 receivers 設定
 applicationObservability:
-  enabled: true # Beyla eBPF
+  enabled: true
+  receivers:
+    otlp:
+      grpc:
+        enabled: true
+      http:
+        enabled: true
+
 annotationAutodiscovery:
   enabled: true
 
@@ -36,5 +47,6 @@ alloy-singleton:
   enabled: true
 alloy-logs:
   enabled: true
+
 costMetrics:
   enabled: false
