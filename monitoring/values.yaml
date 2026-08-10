@@ -5,18 +5,18 @@ cluster:
 destinations:
   - name: mimir
     type: prometheus
-    url: "http://mimir-distributed-nginx.lgtm-system.svc.cluster.local:80/api/v1/push"
+    url: "http://lgtm-components-mimir-nginx.lgtm-system.svc.cluster.local:80/api/v1/push"
 
   - name: loki
     type: loki
-    url: "http://loki.lgtm-system.svc.cluster.local:3100/loki/api/v1/push"
+    url: "http://lgtm-components-loki-gateway.lgtm-system.svc.cluster.local:80/loki/api/v1/push"
 
   - name: tempo
     type: otlp
     protocol: http
-    url: "http://tempo-distributor.lgtm-system.svc.cluster.local:4318"
+    url: "http://lgtm-components-tempo-distributor.lgtm-system.svc.cluster.local:4318"
 
-# 2. 採集功能與微收集器 (Alloy 3.x)
+# 2. 採集功能與微收集器 (Alloy)
 clusterMetrics:
   enabled: true
 
@@ -26,7 +26,6 @@ podLogs:
 clusterEvents:
   enabled: true
 
-# 💡 修正關鍵：補上 receivers 設定
 applicationObservability:
   enabled: true
   receivers:
