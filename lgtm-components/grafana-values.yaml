@@ -10,14 +10,16 @@ datasources:
     datasources:
       - name: Loki
         type: loki
-        url: http://loki.lgtm-system.svc.cluster.local:3100
+        url: http://lgtm-components-loki-gateway.lgtm-system.svc.cluster.local
         isDefault: true
       - name: Mimir
         type: prometheus
-        url: http://mimir-distributed-nginx.lgtm-system.svc.cluster.local:80/prometheus
+        url: http://lgtm-components-mimir-nginx.lgtm-system.svc.cluster.local/prometheus
+        isDefault: false
       - name: Tempo
         type: tempo
-        url: http://tempo-query-frontend.lgtm-system.svc.cluster.local:3100
+        url: http://lgtm-components-tempo-query-frontend.lgtm-system.svc.cluster.local:3100
+        isDefault: false
 
 nodeSelector:
   kubernetes.io/hostname: "a228"
