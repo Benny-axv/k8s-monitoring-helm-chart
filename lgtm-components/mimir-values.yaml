@@ -36,7 +36,8 @@ mimir:
         access_key_id: admin
         secret_access_key: Password123!
         insecure: true
-      prefix: ruler/
+    ruler:
+      rule_path: /data/ruler
 
 alertmanager:
   enabled: false
