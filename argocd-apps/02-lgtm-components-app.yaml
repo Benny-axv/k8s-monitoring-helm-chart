@@ -1,0 +1,56 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: lgtm-components
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  sources:
+    # --- 1. Grafana ---
+    - repoURL: 'https://grafana.github.io/helm-charts'
+      chart: grafana
+      targetRevision: "*"
+      helm:
+        valueFiles:
+          - '$values/lgtm-components/grafana-values.yaml'
+
+    # --- 2. Loki ---
+    - repoURL: 'https://grafana.github.io/helm-charts'
+      chart: loki
+      targetRevision: "*"
+      helm:
+        valueFiles:
+          - '$values/lgtm-components/loki-values.yaml'
+
+    # --- 3. Mimir ---
+    - repoURL: 'https://grafana.github.io/helm-charts'
+      chart: mimir-distributed
+      targetRevision: "*"
+      helm:
+        valueFiles:
+          - '$values/lgtm-components/mimir-values.yaml'
+
+    # --- 4. Tempo ---
+    - repoURL: 'https://grafana.github.io/helm-charts'
+      chart: tempo-distributed
+      targetRevision: "*"
+      helm:
+        valueFiles:
+          - '$values/lgtm-components/tempo-values.yaml'
+
+    # --- Values 倉庫 ---
+    - repoURL: 'https://github.com/Benny-axv/k8s-monitoring-helm-chart.git'
+      targetRevision: main
+      ref: values
+
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: lgtm-system
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

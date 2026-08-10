@@ -1,81 +1,40 @@
-# ----------------------------------------------------
-# 全域叢集名稱
-# ----------------------------------------------------
 cluster:
   name: k8s-cluster-a228
 
-# ----------------------------------------------------
-# 1. 傳送目的地 (Destinations - v3.x 標準)
-# ----------------------------------------------------
+# 1. 目的地對接 lgtm-system 空間下的微服務 API
 destinations:
-  # 1a. Mimir Metrics 目的地
   - name: mimir
     type: prometheus
-    url: "http://lgtm-stack-mimir-nginx.lgtm-system.svc.cluster.local:80/api/v1/push"
+    url: "http://mimir-distributed-nginx.lgtm-system.svc.cluster.local:80/api/v1/push"
 
-  # 1b. Loki Logs 目的地
   - name: loki
     type: loki
-    url: "http://lgtm-stack-loki-gateway.lgtm-system.svc.cluster.local:80/loki/api/v1/push"
+    url: "http://loki.lgtm-system.svc.cluster.local:3100/loki/api/v1/push"
 
-  # 1c. Tempo Traces 目的地 (OTLP HTTP)
   - name: tempo
     type: otlp
     protocol: http
-    url: "http://lgtm-stack-tempo-distributor.lgtm-system.svc.cluster.local:4318"
+    url: "http://tempo-distributor.lgtm-system.svc.cluster.local:4318"
 
-# ----------------------------------------------------
-# 2. 採集功能模組 (Features)
-# ----------------------------------------------------
-
-# 2a. 叢集指標與主機硬體採集 (KSM + Node Exporter)
+# 2. 採集功能與微收集器 (Alloy 3.x)
 clusterMetrics:
   enabled: true
-
-# 2b. Pod Console 日誌收集
 podLogs:
   enabled: true
-
-# 2c. K8s 系統事件收集
 clusterEvents:
   enabled: true
-
-# 2d. eBPF 零代碼自動追蹤 (Grafana Beyla)
 applicationObservability:
-  enabled: true
-  receivers:
-    otlp:
-      grpc:
-        enabled: true
-      http:
-        enabled: true
-
-# 2e. Pod / Service Annotations 自動服務發現
+  enabled: true # Beyla eBPF
 annotationAutodiscovery:
   enabled: true
 
-# ----------------------------------------------------
-# 3. 核心 Alloy 收集器群組 (100% 通過 3.x 驗證規章)
-# ----------------------------------------------------
-
-# 👈 解決當前報錯：Application Observability 必需的 OTLP 接收器
 alloy-receiver:
   enabled: true
-
-# 👈 解決 Annotation Autodiscovery 必需的 Metrics 收集器
 alloy-metrics:
   enabled: true
-
-# 👈 解決 Cluster Events 必需的單例收集器
 alloy-singleton:
   enabled: true
-
-# 👈 解決 Pod Logs 必需的日誌收集器
 alloy-logs:
   enabled: true
-
-# ----------------------------------------------------
-# 4. 關閉用不到的昂貴微服務
-# ----------------------------------------------------
 costMetrics:
   enabled: false

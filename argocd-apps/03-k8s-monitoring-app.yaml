@@ -1,34 +1,31 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: lgtm-stack
+  name: grafana-k8s-monitoring
   namespace: argocd
   finalizers:
-    - resources-finalizer.argocd.argoproj.io  # 保留這個！讓 Argo 自動幫你刪除底層
+    - resources-finalizer.argocd.argoproj.io
 spec:
   project: default
   sources:
     - repoURL: 'https://grafana.github.io/helm-charts'
-      chart: lgtm-distributed
-      targetRevision: "*"
+      chart: k8s-monitoring
+      targetRevision: 3.x.x
       helm:
         valueFiles:
-          - '$values/monitoring/lgtm-values.yaml'
-
+          - '$values/monitoring/values.yaml'
     - repoURL: 'https://github.com/Benny-axv/k8s-monitoring-helm-chart.git'
       targetRevision: main
       ref: values
-
   destination:
     server: 'https://kubernetes.default.svc'
     namespace: monitoring
-
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
-      - SkipDryRunOnMissingResource=true
-      - PrunePropagationPolicy=foreground # 關鍵：確保 Argo CD 按照正確的依賴順序（先刪 Pod 再刪 PVC）強制清理
-      - PruneLast=true                     # 關鍵：讓持久化資源最後才被 Prune，避免順序錯亂卡死
+      - ServerSideApply=true
+      - Force=true
+      - PruneLast=true
