@@ -5,7 +5,7 @@ cluster:
   name: k8s-cluster-a228
 
 # ----------------------------------------------------
-# 1. 傳送目的地 (Destinations - v3.x 重構標準)
+# 1. 傳送目的地 (Destinations - v3.x 標準)
 # ----------------------------------------------------
 destinations:
   # 1a. Mimir Metrics 目的地
@@ -18,17 +18,17 @@ destinations:
     type: loki
     url: "http://lgtm-stack-loki-gateway.lgtm-system.svc.cluster.local:80/loki/api/v1/push"
 
-  # 1c. Tempo Traces 目的地 (OTLP HTTP/gRPC)
+  # 1c. Tempo Traces 目的地 (OTLP HTTP)
   - name: tempo
     type: otlp
     protocol: http
     url: "http://lgtm-stack-tempo-distributor.lgtm-system.svc.cluster.local:4318"
 
 # ----------------------------------------------------
-# 2. 採集功能模組 (Features - v3.x 最新結構)
+# 2. 採集功能模組 (Features)
 # ----------------------------------------------------
 
-# 2a. 叢集指標與主機硬體採集
+# 2a. 叢集指標與主機硬體採集 (KSM + Node Exporter)
 clusterMetrics:
   enabled: true
 
@@ -55,19 +55,27 @@ annotationAutodiscovery:
   enabled: true
 
 # ----------------------------------------------------
-# 3. 核心收集器組件 (解決 Helm 驗證失敗的關鍵區塊)
+# 3. 核心 Alloy 收集器群組 (100% 通過 3.x 驗證規章)
 # ----------------------------------------------------
+
+# 👈 解決當前報錯：Application Observability 必需的 OTLP 接收器
+alloy-receiver:
+  enabled: true
+
+# 👈 解決 Annotation Autodiscovery 必需的 Metrics 收集器
 alloy-metrics:
-  enabled: true  # 👈 修正重點：Annotation Autodiscovery 必須依賴 alloy-metrics！
+  enabled: true
 
+# 👈 解決 Cluster Events 必需的單例收集器
 alloy-singleton:
-  enabled: true  # 用於 Cluster Events 等單例收集
+  enabled: true
 
+# 👈 解決 Pod Logs 必需的日誌收集器
 alloy-logs:
-  enabled: true  # 用於 Pod Logs 收集
+  enabled: true
 
 # ----------------------------------------------------
-# 4. 停用不必要的昂貴微服務 (節省資源)
+# 4. 關閉用不到的昂貴微服務
 # ----------------------------------------------------
 costMetrics:
   enabled: false
