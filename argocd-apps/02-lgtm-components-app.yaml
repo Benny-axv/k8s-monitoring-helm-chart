@@ -11,7 +11,7 @@ spec:
     # --- 1. Grafana ---
     - repoURL: 'https://grafana.github.io/helm-charts'
       chart: grafana
-      targetRevision: "*"
+      targetRevision: "8.x.x"
       helm:
         valueFiles:
           - '$values/lgtm-components/grafana-values.yaml'
@@ -19,15 +19,15 @@ spec:
     # --- 2. Loki ---
     - repoURL: 'https://grafana.github.io/helm-charts'
       chart: loki
-      targetRevision: "*"
+      targetRevision: "6.x.x"
       helm:
         valueFiles:
           - '$values/lgtm-components/loki-values.yaml'
 
-    # --- 3. Mimir ---
+    # --- 3. Mimir (修正關鍵：鎖定 5.x.x 以相容 K8s 1.29) ---
     - repoURL: 'https://grafana.github.io/helm-charts'
       chart: mimir-distributed
-      targetRevision: "*"
+      targetRevision: "5.5.0"
       helm:
         valueFiles:
           - '$values/lgtm-components/mimir-values.yaml'
@@ -35,7 +35,7 @@ spec:
     # --- 4. Tempo ---
     - repoURL: 'https://grafana.github.io/helm-charts'
       chart: tempo-distributed
-      targetRevision: "*"
+      targetRevision: "1.x.x"
       helm:
         valueFiles:
           - '$values/lgtm-components/tempo-values.yaml'
@@ -54,3 +54,4 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
+      - PrunePropagationPolicy=foreground
