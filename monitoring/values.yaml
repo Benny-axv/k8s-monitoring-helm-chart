@@ -28,7 +28,7 @@ destinations:
 # 2. 採集功能模組 (Features - v3.x 最新結構)
 # ----------------------------------------------------
 
-# 2a. 叢集指標與主機硬體採集 (包含 kube-state-metrics 與 node-exporter)
+# 2a. 叢集指標與主機硬體採集
 clusterMetrics:
   enabled: true
 
@@ -36,11 +36,11 @@ clusterMetrics:
 podLogs:
   enabled: true
 
-# 2c. K8s 系統事件收集 (如 Pod 被 OOMKill/ImagePullBackOff 等事件送往 Loki)
+# 2c. K8s 系統事件收集
 clusterEvents:
   enabled: true
 
-# 2d. eBPF 零代碼自動追蹤 (Grafana Beyla - 自動產生 RED Metrics & Traces)
+# 2d. eBPF 零代碼自動追蹤 (Grafana Beyla)
 applicationObservability:
   enabled: true
   receivers:
@@ -55,7 +55,19 @@ annotationAutodiscovery:
   enabled: true
 
 # ----------------------------------------------------
-# 3. 停用不必要的昂貴微服務 (節省資源)
+# 3. 核心收集器組件 (解決 Helm 驗證失敗的關鍵區塊)
+# ----------------------------------------------------
+alloy-metrics:
+  enabled: true  # 👈 修正重點：Annotation Autodiscovery 必須依賴 alloy-metrics！
+
+alloy-singleton:
+  enabled: true  # 用於 Cluster Events 等單例收集
+
+alloy-logs:
+  enabled: true  # 用於 Pod Logs 收集
+
+# ----------------------------------------------------
+# 4. 停用不必要的昂貴微服務 (節省資源)
 # ----------------------------------------------------
 costMetrics:
-  enabled: false # 停用 OpenCost
+  enabled: false
