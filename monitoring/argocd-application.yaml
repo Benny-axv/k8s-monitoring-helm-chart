@@ -32,3 +32,5 @@ spec:
     syncOptions:
       - CreateNamespace=true
       - ServerSideApply=true
+      - PruneLast=true     # 讓 ArgoCD 優先或最後強制清理未在 Manifest 中的舊資源
+      - Force=true         # 如果遇到資源衝突，允許強制覆蓋/刪除
