@@ -1,0 +1,27 @@
+adminPassword: "AdminPassword123!"
+
+service:
+  type: NodePort
+
+# 預設自動綁定好內建的數據來源 (Data Sources)
+datasources:
+  datasources.yaml:
+    apiVersion: 1
+    datasources:
+      - name: Loki
+        type: loki
+        url: http://loki.lgtm-system.svc.cluster.local:3100
+        isDefault: true
+      - name: Mimir
+        type: prometheus
+        url: http://mimir-distributed-nginx.lgtm-system.svc.cluster.local:80/prometheus
+      - name: Tempo
+        type: tempo
+        url: http://tempo-query-frontend.lgtm-system.svc.cluster.local:3100
+
+nodeSelector:
+  kubernetes.io/hostname: "a228"
+tolerations:
+  - key: "node-role.kubernetes.io/control-plane"
+    operator: "Exists"
+    effect: "NoSchedule"
