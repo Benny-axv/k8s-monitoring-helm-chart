@@ -1,33 +1,31 @@
 # ----------------------------------------------------
-# 1. 關鍵設定：強制指定為單機/單節點模式 (Standalone)
+# 1. 啟用分散式模式，並將 Replicas 設為 4 (MinIO 分散式的最小高可用門檻)
 # ----------------------------------------------------
-mode: standalone
-replicas: 1
+mode: distributed
+replicas: 4               # MinIO Erasure Coding 最小高可用所需數量為 4
+drivesPerNode: 1          # 每台 Pod 掛載 1 個 PersistentVolume
 
 rootUser: "admin"
 rootPassword: "Password123!"
 
 # ----------------------------------------------------
-# 2. 降低昂貴的預設資源請求 (給予合理的 RAM/CPU)
+# 2. 降低記憶體，讓 4 個 Pod 能輕鬆分散在 3 台 Node 上
 # ----------------------------------------------------
 resources:
   requests:
-    memory: 512Mi
-    cpu: 250m
+    memory: 256Mi          # 4 * 256Mi = 僅消耗全叢集 1GB RAM！
+    cpu: 100m
   limits:
-    memory: 2Gi
+    memory: 1Gi
 
 # ----------------------------------------------------
-# 3. 持久化磁碟設定
+# 3. 持久化儲存與自動建桶
 # ----------------------------------------------------
 persistence:
   enabled: true
   storageClass: local-path
-  size: 20Gi
+  size: 10Gi
 
-# ----------------------------------------------------
-# 4. 自動建立三個監控服務所需的 S3 Buckets
-# ----------------------------------------------------
 defaultBuckets: "mimir,loki,tempo"
 buckets:
   - name: mimir
@@ -35,11 +33,18 @@ buckets:
   - name: tempo
 
 # ----------------------------------------------------
-# 5. 節點排程鎖定 ( Master Node a228)
+# 4. 允許排程在全部 3 台節點上 (移除 nodeSelector constraint)
 # ----------------------------------------------------
-nodeSelector:
-  kubernetes.io/hostname: "a228"
 tolerations:
   - key: "node-role.kubernetes.io/control-plane"
     operator: "Exists"
     effect: "NoSchedule"
+
+# 打散 Pod 到 3 台 Worker 節點上 ( Pod Anti-Affinity )
+topologySpreadConstraints:
+  - maxSkew: 2
+    topologyKey: kubernetes.io/hostname
+    whenUnsatisfiable: ScheduleAnyway
+    labelSelector:
+      matchLabels:
+        app: minio
