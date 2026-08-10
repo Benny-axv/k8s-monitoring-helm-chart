@@ -10,7 +10,7 @@ mimir:
           access_key_id: admin
           secret_access_key: Password123!
           insecure: true
-          s3forcepathstyle: true
+          s3_force_path_style: true
 
 alertmanager:
   enabled: false
