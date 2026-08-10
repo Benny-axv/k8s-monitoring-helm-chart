@@ -1,4 +1,3 @@
-# 連結 MinIO S3 儲存
 mimir:
   structuredConfig:
     common:
@@ -10,12 +9,15 @@ mimir:
           access_key_id: admin
           secret_access_key: Password123!
           insecure: true
-          s3_force_path_style: true
+    blocks_storage:
+      s3:
+        bucket_name: mimir
+      tsdb:
+        dir: /data/tsdb
 
 alertmanager:
   enabled: false
 
-# 鎖定在 Master Node a228
 ingester:
   zoneAwareReplication:
     enabled: false
