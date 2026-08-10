@@ -1,3 +1,14 @@
+# 1. 關閉 Helm Chart 內建的 MinIO 與建桶 Hook
+minio:
+  enabled: false
+
+minio-subchart:
+  enabled: false
+
+minio-buckets:
+  enabled: false
+
+# 2. 核心全域 MinIO S3 連線與 Bucket 設定
 mimir:
   structuredConfig:
     common:
@@ -10,14 +21,36 @@ mimir:
           secret_access_key: Password123!
           insecure: true
     blocks_storage:
+      backend: s3
       s3:
+        endpoint: minio.minio.svc.cluster.local:9000
         bucket_name: mimir
+        access_key_id: admin
+        secret_access_key: Password123!
+        insecure: true
       tsdb:
         dir: /data/tsdb
+    ruler_storage:
+      backend: s3
+      s3:
+        endpoint: minio.minio.svc.cluster.local:9000
+        bucket_name: mimir
+        access_key_id: admin
+        secret_access_key: Password123!
+        insecure: true
+    alertmanager_storage:
+      backend: s3
+      s3:
+        endpoint: minio.minio.svc.cluster.local:9000
+        bucket_name: mimir
+        access_key_id: admin
+        secret_access_key: Password123!
+        insecure: true
 
 alertmanager:
   enabled: false
 
+# 3. 節點排程與高可用維度設定
 ingester:
   zoneAwareReplication:
     enabled: false
