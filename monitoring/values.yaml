@@ -1,59 +1,61 @@
+# ----------------------------------------------------
+# 全域叢集名稱
+# ----------------------------------------------------
 cluster:
   name: k8s-cluster-a228
 
 # ----------------------------------------------------
-# 1. 數據指標收集 (Metrics)
+# 1. 傳送目的地 (Destinations - v3.x 重構標準)
 # ----------------------------------------------------
-metrics:
-  enabled: true
-  alloy:
-    metrics:
-      enabled: true
-  cost:
-    enabled: false
-  node-exporter:
-    enabled: true
-  kube-state-metrics:
-    enabled: true
+destinations:
+  # 1a. Mimir Metrics 目的地
+  - name: mimir
+    type: prometheus
+    url: "http://lgtm-stack-mimir-nginx.lgtm-system.svc.cluster.local:80/api/v1/push"
 
-opencost:
-  enabled: false
+  # 1b. Loki Logs 目的地
+  - name: loki
+    type: loki
+    url: "http://lgtm-stack-loki-gateway.lgtm-system.svc.cluster.local:80/loki/api/v1/push"
 
-# ----------------------------------------------------
-# 2. 日誌收集 (Logs)
-# ----------------------------------------------------
-logs:
-  enabled: true
-
-events:
-  enabled: false
+  # 1c. Tempo Traces 目的地 (OTLP HTTP/gRPC)
+  - name: tempo
+    type: otlp
+    protocol: http
+    url: "http://lgtm-stack-tempo-distributor.lgtm-system.svc.cluster.local:4318"
 
 # ----------------------------------------------------
-# 3. 鏈路追蹤 (Traces)
+# 2. 採集功能模組 (Features - v3.x 最新結構)
 # ----------------------------------------------------
-traces:
+
+# 2a. 叢集指標與主機硬體採集 (包含 kube-state-metrics 與 node-exporter)
+clusterMetrics:
   enabled: true
 
-# ----------------------------------------------------
-# 4. 自動收集 K8s Annotations 服務發現
-# ----------------------------------------------------
-annotations:
+# 2b. Pod Console 日誌收集
+podLogs:
+  enabled: true
+
+# 2c. K8s 系統事件收集 (如 Pod 被 OOMKill/ImagePullBackOff 等事件送往 Loki)
+clusterEvents:
+  enabled: true
+
+# 2d. eBPF 零代碼自動追蹤 (Grafana Beyla - 自動產生 RED Metrics & Traces)
+applicationObservability:
+  enabled: true
+  receivers:
+    otlp:
+      grpc:
+        enabled: true
+      http:
+        enabled: true
+
+# 2e. Pod / Service Annotations 自動服務發現
+annotationAutodiscovery:
   enabled: true
 
 # ----------------------------------------------------
-# 5. 外部後端服務 (Metrics -> Mimir / Logs -> Loki / Traces -> Tempo)
+# 3. 停用不必要的昂貴微服務 (節省資源)
 # ----------------------------------------------------
-externalServices:
-  prometheus:
-    # 指向 Mimir Nginx Gateway
-    host: "http://lgtm-stack-mimir-nginx.monitoring.svc.cluster.local:80"
-    writeEndpoint: "/api/v1/push"
-
-  loki:
-    # 指向 Loki Gateway
-    host: "http://lgtm-stack-loki-gateway.monitoring.svc.cluster.local:80"
-    writeEndpoint: "/loki/api/v1/push"
-
-  tempo:
-    # 指向 Tempo Distributor (OTLP HTTP Endpoint)
-    host: "http://lgtm-stack-tempo-distributor.monitoring.svc.cluster.local:4318"
+costMetrics:
+  enabled: false # 停用 OpenCost
