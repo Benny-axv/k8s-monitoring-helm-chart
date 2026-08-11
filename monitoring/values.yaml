@@ -1,7 +1,7 @@
 cluster:
   name: k8s-cluster-a228
 
-# 1. 數據傳送目的地對接 lgtm-system 空間下的微服務 API
+# 1. 數據傳送目的地對接 lgtm-system 下的微服務 API
 destinations:
   - name: mimir
     type: prometheus
